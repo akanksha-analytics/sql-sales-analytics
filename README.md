@@ -1,48 +1,67 @@
-# 📊 SQL Sales Analytics Project
+# 📊 SQL Retail Sales Analytics Project
 
-This project showcases end-to-end SQL analysis on a sales dataset.  
-It demonstrates strong SQL skills used in Business Analyst and Data Analyst roles.
+This project showcases end-to-end SQL analysis using a **retail sales dataset**.  
+It demonstrates practical SQL skills used daily in Business Analyst and Data Analyst roles.
 
 ---
 
 ## 🔍 Objective
 
-Businesses need to understand:
-- Which products generate the most revenue?
-- Which regions perform best?
-- Which customer segments are most profitable?
-- How do monthly sales trends change?
-- What drives profit vs loss?
+Retail businesses need to understand:
 
-These SQL queries help answer those questions.
+- Which products generate the highest revenue?
+- How do sales vary by customer demographics (age, gender)?
+- What are the monthly and weekly sales trends?
+- Who are the top customers?
+- Which product categories perform best?
+
+This project answers these questions using optimized SQL queries, CTEs, and window functions.
 
 ---
 
 ## 🛠 Tools Used
-- **SQL (PostgreSQL syntax)**
-- Window functions  
-- Aggregations  
-- CTEs  
-- Ranking  
-- Grouping & joins  
+
+- **SQL (PostgreSQL-style syntax)**
+- Grouping & filtering
+- Aggregations (`SUM`, `AVG`, `COUNT`)
+- Date functions
+- CTEs (Common Table Expressions)
+- Window functions (`RANK`, `OVER`)
+- Data segmentation (age groups, gender)
 
 ---
 
 ## 🧠 Concepts Demonstrated
 
 ### ✔ Aggregations  
-SUM, AVG, COUNT, grouping, conditional calculations.
+Summarizing sales, order counts, total quantity, and average transaction value.
 
 ### ✔ CTEs  
-Used to analyze monthly revenue trends.
+Used for monthly revenue trends and other layered analysis.
 
 ### ✔ Window Functions  
-`RANK()` to identify top-selling products.
+`RANK()` to identify top customers and best-performing product categories.
 
 ### ✔ Segmentation  
-Region-wise, category-wise, and customer-segment analysis.
+Analysis by gender, age group, product category.
+
+### ✔ Date Analysis  
+Monthly trends, weekly patterns, weekday vs weekend performance.
 
 ---
 
-## 📁 Files in This Repository
+## 📁 Dataset
 
+The dataset includes the following fields:
+
+- **Transaction ID**  
+- **Date**  
+- **Customer ID**  
+- **Gender**  
+- **Age**  
+- **Product Category**  
+- **Quantity**  
+- **Price per Unit**  
+- **Total Amount**
+
+This dataset is stored in:  
