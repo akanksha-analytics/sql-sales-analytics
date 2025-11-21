@@ -1,105 +1,151 @@
 -- ============================================================
--- SQL SALES ANALYTICS PROJECT: CORE QUERIES
--- Demonstrates Joins, Aggregations, CTEs, Window Functions
+-- SQL SALES ANALYTICS PROJECT: RETAIL SALES DATA
+-- Table: RetailSales
+-- Columns:
+--   TransactionID, Date, CustomerID, Gender, Age,
+--   ProductCategory, Quantity, PricePerUnit, TotalAmount
 -- ============================================================
 
 ---------------------------------------------------------------
 -- 1️⃣ BASIC KPIs
 ---------------------------------------------------------------
 
--- Total sales
-SELECT SUM(Sales) AS total_sales
-FROM SalesData;
+-- Total revenue
+SELECT SUM(TotalAmount) AS total_revenue
+FROM RetailSales;
 
--- Total profit
-SELECT SUM(Profit) AS total_profit
-FROM SalesData;
+-- Total quantity sold
+SELECT SUM(Quantity) AS total_quantity_sold
+FROM RetailSales;
+
+-- Number of transactions
+SELECT COUNT(*) AS total_transactions
+FROM RetailSales;
 
 -- Average order value (AOV)
-SELECT SUM(Sales) / COUNT(DISTINCT OrderID) AS avg_order_value
-FROM SalesData;
+SELECT SUM(TotalAmount) / COUNT(*) AS avg_order_value
+FROM RetailSales;
 
 
 ---------------------------------------------------------------
--- 2️⃣ SALES BY CATEGORY
----------------------------------------------------------------
-
-SELECT 
-    Category, 
-    SUM(Sales) AS total_sales,
-    SUM(Profit) AS total_profit
-FROM SalesData
-GROUP BY Category
-ORDER BY total_sales DESC;
-
-
----------------------------------------------------------------
--- 3️⃣ REGION-WISE PERFORMANCE
+-- 2️⃣ SALES BY PRODUCT CATEGORY
 ---------------------------------------------------------------
 
 SELECT 
-    Region,
-    SUM(Sales) AS total_sales,
-    SUM(Profit) AS total_profit,
-    AVG(Profit/Sales) AS profit_margin
-FROM SalesData
-GROUP BY Region
-ORDER BY total_sales DESC;
+    ProductCategory,
+    SUM(TotalAmount) AS total_revenue,
+    SUM(Quantity) AS total_quantity
+FROM RetailSales
+GROUP BY ProductCategory
+ORDER BY total_revenue DESC;
 
 
 ---------------------------------------------------------------
--- 4️⃣ BEST-SELLING PRODUCTS
+-- 3️⃣ REVENUE BY GENDER
 ---------------------------------------------------------------
 
 SELECT 
-    ProductName,
-    SUM(Sales) AS total_sales,
-    SUM(Quantity) AS total_qty
-FROM SalesData
-GROUP BY ProductName
-ORDER BY total_sales DESC
+    Gender,
+    SUM(TotalAmount) AS total_revenue,
+    COUNT(*) AS total_transactions,
+    AVG(TotalAmount) AS avg_order_value
+FROM RetailSales
+GROUP BY Gender
+ORDER BY total_revenue DESC;
+
+
+---------------------------------------------------------------
+-- 4️⃣ AGE GROUP ANALYSIS
+---------------------------------------------------------------
+
+-- Example: bucket ages into groups
+SELECT
+    CASE
+        WHEN Age < 25 THEN 'Under 25'
+        WHEN Age BETWEEN 25 AND 34 THEN '25-34'
+        WHEN Age BETWEEN 35 AND 44 THEN '35-44'
+        WHEN Age BETWEEN 45 AND 54 THEN '45-54'
+        ELSE '55+'
+    END AS age_group,
+    SUM(TotalAmount) AS total_revenue,
+    COUNT(*) AS transactions,
+    AVG(TotalAmount) AS avg_order_value
+FROM RetailSales
+GROUP BY
+    CASE
+        WHEN Age < 25 THEN 'Under 25'
+        WHEN Age BETWEEN 25 AND 34 THEN '25-34'
+        WHEN Age BETWEEN 35 AND 44 THEN '35-44'
+        WHEN Age BETWEEN 45 AND 54 THEN '45-54'
+        ELSE '55+'
+    END
+ORDER BY total_revenue DESC;
+
+
+---------------------------------------------------------------
+-- 5️⃣ MONTHLY REVENUE TREND (CTE + DATE_TRUNC)
+---------------------------------------------------------------
+
+WITH MonthlyRevenue AS (
+    SELECT 
+        DATE_TRUNC('month', Date) AS month,
+        SUM(TotalAmount) AS total_revenue,
+        SUM(Quantity) AS total_quantity
+    FROM RetailSales
+    GROUP BY DATE_TRUNC('month', Date)
+)
+SELECT *
+FROM MonthlyRevenue
+ORDER BY month;
+
+
+---------------------------------------------------------------
+-- 6️⃣ TOP 10 CUSTOMERS BY REVENUE (WINDOW FUNCTION)
+---------------------------------------------------------------
+
+SELECT
+    CustomerID,
+    SUM(TotalAmount) AS total_revenue,
+    SUM(Quantity) AS total_quantity,
+    RANK() OVER (ORDER BY SUM(TotalAmount) DESC) AS revenue_rank
+FROM RetailSales
+GROUP BY CustomerID
+ORDER BY revenue_rank
 LIMIT 10;
 
 
 ---------------------------------------------------------------
--- 5️⃣ CTE: MONTHLY TREND ANALYSIS
----------------------------------------------------------------
-
-WITH MonthlySales AS (
-    SELECT 
-        DATE_TRUNC('month', OrderDate) AS Month,
-        SUM(Sales) AS total_sales,
-        SUM(Profit) AS total_profit
-    FROM SalesData
-    GROUP BY DATE_TRUNC('month', OrderDate)
-)
-SELECT *
-FROM MonthlySales
-ORDER BY Month;
-
-
----------------------------------------------------------------
--- 6️⃣ WINDOW FUNCTION: RANK TOP PRODUCTS
+-- 7️⃣ PRODUCT CATEGORY RANKING (WINDOW FUNCTION)
 ---------------------------------------------------------------
 
 SELECT
-    ProductName,
-    SUM(Sales) AS total_sales,
-    RANK() OVER (ORDER BY SUM(Sales) DESC) AS sales_rank
-FROM SalesData
-GROUP BY ProductName
-ORDER BY sales_rank;
+    ProductCategory,
+    SUM(TotalAmount) AS total_revenue,
+    SUM(Quantity) AS total_quantity,
+    RANK() OVER (ORDER BY SUM(TotalAmount) DESC) AS category_rank
+FROM RetailSales
+GROUP BY ProductCategory
+ORDER BY category_rank;
 
 
 ---------------------------------------------------------------
--- 7️⃣ CUSTOMER SEGMENT ANALYSIS
+-- 8️⃣ WEEKDAY VS WEEKEND PERFORMANCE (OPTIONAL)
 ---------------------------------------------------------------
 
-SELECT 
-    Segment,
-    SUM(Sales) AS total_sales,
-    SUM(Profit) AS total_profit,
-    COUNT(DISTINCT CustomerID) AS total_customers
-FROM SalesData
-GROUP BY Segment
-ORDER BY total_sales DESC;
+-- This assumes your SQL dialect has EXTRACT(DOW FROM Date)
+-- 0 = Sunday, 6 = Saturday (PostgreSQL)
+SELECT
+    CASE 
+        WHEN EXTRACT(DOW FROM Date) IN (0,6) THEN 'Weekend'
+        ELSE 'Weekday'
+    END AS day_type,
+    SUM(TotalAmount) AS total_revenue,
+    COUNT(*) AS transactions,
+    AVG(TotalAmount) AS avg_order_value
+FROM RetailSales
+GROUP BY
+    CASE 
+        WHEN EXTRACT(DOW FROM Date) IN (0,6) THEN 'Weekend'
+        ELSE 'Weekday'
+    END
+ORDER BY total_revenue DESC;
